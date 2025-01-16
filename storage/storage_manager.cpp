@@ -1,10 +1,10 @@
 #include "../include/storage_manager.h"
 
-DSMgr::DSMgr(int bufsize, std::string filename) :size(0), numPages(0) {
+DSMgr::DSMgr(int bufsize, std::string filename) :size(0), numPages(0), rn(0), wn(0) {
 	OpenFile(filename);
 	ftop = new int[bufsize]();
 }
-DSMgr::DSMgr(int bufsize) :size(0), numPages(0) {
+DSMgr::DSMgr(int bufsize) :size(0), numPages(0), rn(0), wn(0) {
 	ftop = new int[bufsize]();
 }
 DSMgr::~DSMgr() {
@@ -52,23 +52,25 @@ int DSMgr::WritePage(int frame_id, bFrame frm) {
 	fseek(currFile, d * FRAMESIZE, 0);
 	SetUse(d, 0);
 	fwrite(frm.field, FRAMESIZE, 1, currFile);
+	wn++;
 	return 0;
 }
 bFrame DSMgr::ReadPage(int page_id) {
 	char tmp[FRAMESIZE];
 	fseek(currFile, page_id * FRAMESIZE, 0);
 	fread(tmp, FRAMESIZE, 1, currFile);
+	rn++;
 	bFrame ans;
 	ans.field = tmp;
 	SetUse(page_id, 1);
 	return ans;
 }
 
-char* DSMgr::printpage(int page_id) {
+char* DSMgr::PrintPage(int page_id) {
 	return ReadPage(page_id).field;
 }
 
-int DSMgr::newpage() {
+int DSMgr::NewPage() {
 	int i;
 	for (i = 0; i < numPages; i++) {
 		if (pages[i] == 0) {

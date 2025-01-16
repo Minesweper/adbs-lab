@@ -17,12 +17,10 @@ public:
 	BMgr(int bufsize, std::string filename);
 	BMgr(std::string filename);
 	~BMgr();
-	// Interface functions 
 	int FixPage(int page_id, int prot);
 	NewPage FixNewPage();
 	int UnfixPage(int page_id);
 	int NumFreeFrames();
-	// Internal Functions 
 	int SelectVictim();
 	int Hash(int page_id);
 	BCB* hash(int page_id);
@@ -34,8 +32,19 @@ public:
 	void PrintFrame(int frame_id);
 	void writebuf(int page, int frame);
 	void insertbcb(int page, int frame);
+	int ReadNum(){
+		return manager->ReadNum();
+	}
+	int WriteNum(){
+		return manager->WriteNum();
+	}
+	double hitrate(){
+		return (double)(bufferin) / (double)(bufferin + bufferout);
+	}
 private:
 	int _capacity;
+	int bufferin;
+	int bufferout;
 	DSMgr* manager;
 	BCB** ptof;
 	lru* lr;

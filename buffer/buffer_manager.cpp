@@ -1,11 +1,11 @@
 #include "../include/buffer_manager.h"
 
-BMgr::BMgr(int bufs, std::string filename) :_capacity(bufs){
+BMgr::BMgr(int bufs, std::string filename) :_capacity(bufs), bufferin(0), bufferout(0){
 	ptof = new BCB * [bufs]();
 	manager = new DSMgr(bufs, filename);
 	lr = new lru(bufs);
 }
-BMgr::BMgr(std::string filename) :_capacity(DEFBUFSIZE) {
+BMgr::BMgr(std::string filename) :_capacity(DEFBUFSIZE), bufferin(0), bufferout(0) {
 	ptof = new BCB * [DEFBUFSIZE]();
 	manager = new DSMgr(DEFBUFSIZE, filename);
 	lr = new lru(DEFBUFSIZE);
@@ -20,7 +20,7 @@ BMgr::~BMgr() {
 NewPage BMgr::FixNewPage() {
 	NewPage ans(-1, -1);
 	if (lr->num() < _capacity) {
-		int tmp = manager->newpage();
+		int tmp = manager->NewPage();
 		if (tmp == -1) return ans;
 
 	}
@@ -51,7 +51,7 @@ BCB* BMgr::hash(int page_id) {
 }
 
 void BMgr::SetDirty(int frame_id) {
-	int d = manager->fratopage(frame_id);
+	int d = manager->FraToPage(frame_id);
 	if (d != 0) {
 		BCB* tmp = hash(d);
 		if (tmp != 0)tmp->dirty = 1;
@@ -60,7 +60,7 @@ void BMgr::SetDirty(int frame_id) {
 }
 
 void BMgr::UnsetDirty(int frame_id) {
-	int d = manager->fratopage(frame_id);
+	int d = manager->FraToPage(frame_id);
 	if (d != 0) {
 		BCB* tmp = hash(d);
 		if (tmp != 0)tmp->dirty = 0;
@@ -68,8 +68,8 @@ void BMgr::UnsetDirty(int frame_id) {
 }
 
 void BMgr::PrintFrame(int frame_id) {
-	int d = manager->fratopage(frame_id);
-	printf("%s", manager->printpage(d));
+	int d = manager->FraToPage(frame_id);
+	printf("%s", manager->PrintPage(d));
 }
 
 void BMgr::RemoveLRUEle(int frid) {
@@ -94,7 +94,7 @@ void BMgr::RemoveBCB(BCB* ptr, int page_id) {
 
 int BMgr::SelectVictim() {
 	int d = lr->getfirst();
-	int page = manager->fratopage(d);
+	int page = manager->FraToPage(d);
 	BCB* tmp = hash(page);
 	RemoveBCB(tmp, page);
 	return d;
@@ -102,7 +102,7 @@ int BMgr::SelectVictim() {
 
 void BMgr::WriteDirtys() {
 	for (int i = 0; i < _capacity; i++) {
-		int id = manager->fratopage(i);
+		int id = manager->FraToPage(i);
 		BCB* tmp = hash(id);
 		if (tmp->dirty) {
 			manager->WritePage(tmp->frame_id, lr->page(tmp->frame_id));
@@ -119,7 +119,7 @@ void BMgr::insertbcb(int page, int frame) {
 		while (tmp->next != 0) tmp = tmp->next;
 		tmp->next = b;
 	}
-	manager->sethash(frame, page);
+	manager->SetHash(frame, page);
 }
 
 void BMgr::writebuf(int page, int frame) {
@@ -132,6 +132,7 @@ int BMgr::FixPage(int page_id, int prot) {
 	BCB* tmp = hash(page_id);
 	int d;
 	if (tmp == 0) {
+		bufferout++;
 		if (lr->num() == _capacity)
 			d = SelectVictim();
 		else d = lr->num();
@@ -139,6 +140,7 @@ int BMgr::FixPage(int page_id, int prot) {
 		return d;
 	}
 	else {
+		bufferin++;
 		lr->update(tmp->frame_id);
 		if (prot) SetDirty(tmp->frame_id);
 		return tmp->frame_id;
