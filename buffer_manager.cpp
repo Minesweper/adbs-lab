@@ -1,4 +1,4 @@
-#include "../include/buffer_manager.h"
+#include "include/buffer_manager.h"
 
 BMgr::BMgr(int bufs, std::string filename) :_capacity(bufs), bufferin(0), bufferout(0){
 	ptof = new BCB * [bufs]();
@@ -97,7 +97,9 @@ int BMgr::SelectVictim() {
 	int page = manager->FraToPage(d);
 	BCB* tmp = hash(page);
 	RemoveBCB(tmp, page);
+	
 	return d;
+
 }
 
 void BMgr::WriteDirtys() {
@@ -133,8 +135,7 @@ int BMgr::FixPage(int page_id, int prot) {
 	int d;
 	if (tmp == 0) {
 		bufferout++;
-		if (lr->num() == _capacity)
-			d = SelectVictim();
+		if (lr->num() >= _capacity) d = SelectVictim();
 		else d = lr->num();
 		writebuf(page_id, d);
 		return d;

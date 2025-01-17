@@ -26,6 +26,7 @@ public:
 		return ftop[frameid];
 	}
 	void SetHash(int f, int p) {
+		
 		ftop[f] = p;
 	}
 	int NewPage();

@@ -1,4 +1,4 @@
-#include "../include/storage_manager.h"
+#include "include/storage_manager.h"
 
 DSMgr::DSMgr(int bufsize, std::string filename) :size(0), numPages(0), rn(0), wn(0) {
 	OpenFile(filename);
@@ -61,7 +61,7 @@ bFrame DSMgr::ReadPage(int page_id) {
 	fread(tmp, FRAMESIZE, 1, currFile);
 	rn++;
 	bFrame ans;
-	ans.field = tmp;
+	memcpy(ans.field, tmp, FRAMESIZE);
 	SetUse(page_id, 1);
 	return ans;
 }

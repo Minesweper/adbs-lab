@@ -4,7 +4,7 @@
 #define FRAMESIZE  4096 
 #define DEFBUFSIZE 1024 
 
-#define MAXPAGES 2048
+#define MAXPAGES 50000
 
 
 struct bFrame

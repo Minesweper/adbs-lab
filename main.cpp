@@ -4,7 +4,7 @@
 int main()
 {
     
-    std::string filename = "data-5w-50w-zipf.txt";
+    std::string filename = "../data-5w-50w-zipf.txt";
     FILE* db_file = fopen("data.dbf", "r");
     /* create db with certain size */
     if (db_file == NULL) {
@@ -31,7 +31,6 @@ int main()
     }
     clock_t time2 = clock();
 
-    printf("Read Page: %d times, Write Page: %d times.\n", bmgr->ReadNum(), bmgr->WriteNum());
     printf("Buffer Hit Rate: %.2f.\n", bmgr->hitrate());
     printf("Missions Complete in %.2f seconds.\n", (double)(time2-time1) / CLOCKS_PER_SEC);
     fclose(data_file);
